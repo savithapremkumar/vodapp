@@ -7,8 +7,7 @@ Download this repository or clone it to your system
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
-
+You will need the latest stable versions of
 ```
 Node.js
 npm
@@ -21,7 +20,7 @@ npm
 Navigate to the directory where you downloaded/cloned the repo
 1.Do 'npm install' to install all dependencies to run this project
 2.Start the webpack dev server with 'npm run start'
-3.Navigate to http://localhost:3000
+3.Navigate to http://localhost:3000 in your browser
 ```
 
 To build for deployment
