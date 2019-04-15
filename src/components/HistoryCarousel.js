@@ -3,16 +3,14 @@ import Slider from "react-slick";
 import VideoPlayer from "./VideoPlayer";
 import screenfull from "screenfull";
 import { findDOMNode } from 'react-dom';
-import defaultPlaceholder from '../assets/img/placeholder.png';
 
 
-class VideoCarousel extends React.Component {
+class HistoryCarousel extends React.Component {
   constructor(props) {
     super(props);
     this.player = React.createRef();
 
     this.state = {
-      movies: null,
       playVideo: false,
       videoUrl: "",
       playing:false
@@ -34,6 +32,7 @@ class VideoCarousel extends React.Component {
       playVideo: true,
       videoUrl: item.contents[0].url
     });
+   
     screenfull.request(findDOMNode(this.player.current));
     this.props.parentMethod(item,e);
   }
@@ -46,18 +45,9 @@ class VideoCarousel extends React.Component {
     });
   }
 
-  handleKeyDown(item,e) {
-    console.log("keypress")
-    console.log(e.key)
+  handleKeyDown(e) {
     if (e.key === "Escape") {
-      console.log("escaped")
       this.stopVideo(e);
-    }
-
-    if(e.key === "Enter"){
-      console.log("enter")
-      this.playVideo(item,e);
-
     }
   }
 
@@ -67,28 +57,16 @@ class VideoCarousel extends React.Component {
 
   setReady(){
     this.setState({playing:true})
-
   }
-
-
 
 
   componentDidMount() {
-    // #1. Fetch movies from the API
-    fetch('https://demo2697834.mockable.io/movies')
-      .then(response => response.json()) // Parse the JSON response
-      .then(movies => this.setState({ movies })) // #2. Push the movies json object to component state
+    document.addEventListener('keydown',this.handleKeyDown);
 
-      //document.addEventListener('keydown',this.handleKeyDown);
   }
-
+   
   componentWillUnmount(){
-    //document.removeEventListener('keydown',this.handleKeyDown);
-
-  }
-
-  addDefaultSrc(e){
-    e.target.src = defaultPlaceholder;
+    document.removeEventListener('keydown',this.handleKeyDown);
   }
 
 
@@ -98,9 +76,6 @@ class VideoCarousel extends React.Component {
 
     const settings = {
       accessibility:true,
-      focusOnSelect: true,
-      draggable: true,
-      arrows:true,
       infinite: false,
       speed: 500,
       slidesToShow: 5,
@@ -130,9 +105,9 @@ class VideoCarousel extends React.Component {
         }
       ]
     };
-    const { movies } = this.state
+    const movies = this.props.history
 
-    if (!movies) return <div className="loading"></div>
+    if (!movies || movies.length === 0) return <div>You haven't viewed any videos yet</div>
 
     // #3. Finally, render the `<Carousel />` with the movies
     return <div className="container">
@@ -140,15 +115,15 @@ class VideoCarousel extends React.Component {
         <div className="col-12">
           <Slider {...settings}>
             {
-              movies.entries.map((item, index) => {
-                return (<div className="video" key={index} tabIndex="0" onKeyDown={(e) => this.handleKeyDown(item,e)}  onClick={(e) => this.playVideo(item, e)}>
-                  <img src={item.images[0].url} onError={this.addDefaultSrc} />
+              movies.map((item, index) => {
+                return (<div className="video" key={index} onClick={(e) => this.playVideo(item, e)}>
+                  <img src={item.images[0].url} />
                   <div className="title">{item.title}</div>
                 </div>)
               })
             }
           </Slider>
-          <VideoPlayer setReady={()=>this.setReady()} stopVideo={() =>this.stopVideo()} setStart={() =>this.setStart()} setRef={this.player} isVisible={this.state.playVideo} onKeyDown={(e) => this.handleKeyDown(null,e)} url={this.state.videoUrl}></VideoPlayer>
+          <VideoPlayer tabIndex="0" setReady={()=>this.setReady()} stopVideo={() =>this.stopVideo()} setStart={() =>this.setStart()} setRef={this.player} isVisible={this.state.playVideo} onKeyDown={(e) => this.handleKeyDown(e)} url={this.state.videoUrl}></VideoPlayer>
         </div>
       </div>
 
@@ -156,4 +131,4 @@ class VideoCarousel extends React.Component {
   }
 }
 
-export default VideoCarousel;
+export default HistoryCarousel;
