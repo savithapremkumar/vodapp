@@ -10,19 +10,26 @@ class VideoCarousel extends React.Component {
   constructor(props) {
     super(props);
     this.player = React.createRef();
+    this.slider = React.createRef();
+    this.videos = React.createRef();
 
     this.state = {
       movies: null,
       playVideo: false,
       videoUrl: "",
-      playing:false
+      playing: false
     }
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.stopVideo = this.stopVideo.bind(this);
 
     if (screenfull.enabled) {
+      //using screenfull to check if fullscreen is enabled
       screenfull.on('change', (e) => {
-        this.state.playing ? this.stopVideo(e) : console.log(this.state.playing);
+        var e = window.event || e;
+        //if video is playing then stop it 
+        if (this.state.playing) {
+          this.stopVideo(e)
+        }
       });
     }
   }
@@ -30,43 +37,50 @@ class VideoCarousel extends React.Component {
 
 
   playVideo(item, e) {
+    var e = window.event || e;
     this.setState({
       playVideo: true,
       videoUrl: item.contents[0].url
     });
     screenfull.request(findDOMNode(this.player.current));
-    this.props.parentMethod(item,e);
+    //pass the played video to parent to add to history
+    this.props.parentMethod(item, e);
   }
 
   stopVideo(e) {
+    var e = window.event || e;
     this.setState({
       playVideo: false,
       videoUrl: '',
-      playing:false
+      playing: false
     });
   }
 
-  handleKeyDown(item,e) {
-    console.log("keypress")
-    console.log(e.key)
+  handleKeyDown(e) {
+    var e = window.event || e;
     if (e.key === "Escape") {
-      console.log("escaped")
       this.stopVideo(e);
     }
+    if (e.key === "ArrowRight") {
+      this.slider.current.slickNext();
+    }
+    if (e.key === "ArrowLeft") {
+      this.slider.current.slickPrev();
+    }
 
-    if(e.key === "Enter"){
-      console.log("enter")
-      this.playVideo(item,e);
+    if (e.key === "Enter") {
+      var item = this.state.movies.entries[this.videos.current.id];
+      this.playVideo(item, e);
 
     }
   }
 
-  setStart(){
+  setStart() {
     this.player.current.seekTo(0);
   }
 
-  setReady(){
-    this.setState({playing:true})
+  setReady() {
+    this.setState({ playing: true })
 
   }
 
@@ -78,17 +92,20 @@ class VideoCarousel extends React.Component {
     fetch('https://demo2697834.mockable.io/movies')
       .then(response => response.json()) // Parse the JSON response
       .then(movies => this.setState({ movies })) // #2. Push the movies json object to component state
-
-      //document.addEventListener('keydown',this.handleKeyDown);
+    //Add document keydown listener because we expect keydown to be captured for divs and non-input elements
+    document.addEventListener('keydown', this.handleKeyDown);
   }
 
-  componentWillUnmount(){
-    //document.removeEventListener('keydown',this.handleKeyDown);
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleKeyDown);
 
   }
 
-  addDefaultSrc(e){
-    e.target.src = defaultPlaceholder;
+  //Add a placeholder image in case of error in loading image from api
+  addDefaultSrc(e) {
+    var e = window.event || e;
+    var targ = e.target || e.srcElement;
+    targ.src = defaultPlaceholder;
   }
 
 
@@ -97,13 +114,14 @@ class VideoCarousel extends React.Component {
   render() {
 
     const settings = {
-      accessibility:true,
-      focusOnSelect: true,
-      draggable: true,
-      arrows:true,
+      accessibility: false,
+      focusOnSelect: false,
+      draggable: false,
+      arrows: true,
       infinite: false,
       speed: 500,
       slidesToShow: 5,
+      slidesToScroll: 1,
       responsive: [
         {
           breakpoint: 991,
@@ -138,17 +156,17 @@ class VideoCarousel extends React.Component {
     return <div className="container">
       <div className="content row">
         <div className="col-12">
-          <Slider {...settings}>
+          <Slider {...settings} ref={this.slider}>
             {
               movies.entries.map((item, index) => {
-                return (<div className="video" key={index} tabIndex="0" onKeyDown={(e) => this.handleKeyDown(item,e)}  onClick={(e) => this.playVideo(item, e)}>
+                return (<div className="video" key={index} id={index} tabIndex="0" ref={this.videos} onClick={(e) => this.playVideo(item, e)}>
                   <img src={item.images[0].url} onError={this.addDefaultSrc} />
                   <div className="title">{item.title}</div>
                 </div>)
               })
             }
           </Slider>
-          <VideoPlayer setReady={()=>this.setReady()} stopVideo={() =>this.stopVideo()} setStart={() =>this.setStart()} setRef={this.player} isVisible={this.state.playVideo} onKeyDown={(e) => this.handleKeyDown(null,e)} url={this.state.videoUrl}></VideoPlayer>
+          <VideoPlayer setReady={() => this.setReady()} stopVideo={() => this.stopVideo()} setStart={() => this.setStart()} setRef={this.player} isVisible={this.state.playVideo} onKeyDown={(e) => this.handleKeyDown(e)} url={this.state.videoUrl}></VideoPlayer>
         </div>
       </div>
 

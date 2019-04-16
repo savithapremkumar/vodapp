@@ -19,7 +19,7 @@ npm
 ```
 Navigate to the directory where you downloaded/cloned the repo
 1.Do 'npm install' to install all dependencies to run this project
-2.Start the webpack dev server with 'npm run start'
+2.Start the webpack dev server with 'npm run dev'
 3.Navigate to http://localhost:3000 in your browser
 ```
 
@@ -33,11 +33,17 @@ Do 'npm run build' to generate the bundled javascript in the dist folder
 
 
 ```
-1.Playing video on Enter key press
+Optional features
 ```
 
+### Tested on
+
+```
+Platforms : Windows , MacOS
+Browsers : Chrome Version 73.0.3683.103, Edge Version 42.17134.1.0
+```
 ### Known bugs
 
 ```
-1.Seek control on video player will not work as expected
+Seek control on video player will not work as expected
 ```

@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import { hot } from "react-hot-loader";
 import VideoCarousel from "./components/VideoCarousel";
 import Header from './components/Header';
-import History from './components/History';
-import "./App.css";
+import History from './components/History/History';
+import "./assets/css/App.css";
 
 class App extends React.Component {
     constructor(props) {
